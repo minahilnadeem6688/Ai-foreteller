@@ -7,7 +7,7 @@
 Every column scored, the line of play it expects drawn on the board,
 and a live count of how much of the game tree alpha-beta pruning skipped.
 
-**[Play it](https://ai-foreteller.netlify.app)**
+**[Play it](https://ai-foreteller.vercel.app)**
 
 <img src="docs/screenshots/game.png" width="860" alt="AI Foreteller mid-game: column scores above the board, the next predicted moves as numbered dashed discs, and the search panel" />
 
