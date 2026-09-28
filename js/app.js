@@ -253,7 +253,13 @@
       ? `Four in a row against the ${level[0].toUpperCase() + level.slice(1)}. Try a harder level next.`
       : winner ? `The Foreteller connected four in ${aiMoves} moves.` : 'The board filled with no four in a row.';
     els.verdict.textContent = winner === you ? 'You won.' : winner ? 'The Foreteller won.' : 'Nobody won this one.';
-    setTimeout(() => { if (over) els.result.hidden = false; }, 700);
+    setTimeout(() => {
+      if (!over) return;
+      els.result.hidden = false;
+      // on a small phone the card lands below the board, so bring it into view
+      const r = els.result.getBoundingClientRect();
+      if (r.bottom > innerHeight) els.result.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    }, 700);
     setTurn(false);
     return true;
   }
