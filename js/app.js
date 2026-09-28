@@ -10,6 +10,7 @@
     oracle: { timeMs: 2200 },
   };
   const HINT = { timeMs: 1200 };
+  const LINE_SHOWN = 8; // the next few predicted moves; the full line would bury the real discs
   const MIN_THINK_MS = 450; // so an instant reply still reads as a move, not a glitch
 
   const $ = (id) => document.getElementById(id);
@@ -141,7 +142,7 @@
     if (!els.showLine.checked || over || !line.length) return;
     const h = Array.from(pos.heights);
     let who = lineFrom;
-    line.forEach((c, i) => {
+    line.slice(0, LINE_SHOWN).forEach((c, i) => {
       if (h[c] >= ROWS) return;
       const cell = cellEls[c][h[c]++];
       cell.classList.add(who === you ? 'ghost-you' : 'ghost-ai');
@@ -229,6 +230,8 @@
     const r = pos.play(c);
     const win = pos.winningCells(c, r);
     renderBoard([c, r]);
+    boardEl.classList.remove('is-thud');
+    setTimeout(() => boardEl.classList.add('is-thud'), (0.2 + (ROWS - r) * 0.05) * 1000);
     if (win) return finish(pos.cells[c * ROWS + r], win);
     if (pos.moves === SIZE) return finish(0);
     return false;
@@ -240,10 +243,12 @@
     renderLine();
     if (cells) {
       boardEl.classList.add('is-over');
-      cells.forEach(([c, r]) => cellEls[c][r].classList.add('is-win'));
+      cells.forEach(([c, r], i) => { cellEls[c][r].classList.add('is-win'); cellEls[c][r].style.setProperty('--i', i); });
     }
     const aiMoves = pos.history.filter((_, i) => (i % 2) + 1 !== you).length;
-    els.resultTitle.textContent = winner === you ? 'You changed the future.' : winner ? 'As foretold.' : 'A draw.';
+    els.result.classList.toggle('is-lost', !!winner && winner !== you);
+    els.result.classList.toggle('is-draw', !winner);
+    els.resultTitle.textContent = winner === you ? 'You changed the future!' : winner ? 'As foretold.' : 'A draw.';
     els.resultText.textContent = winner === you
       ? `Four in a row against the ${level[0].toUpperCase() + level.slice(1)}. Try a harder level next.`
       : winner ? `The Foreteller connected four in ${aiMoves} moves.` : 'The board filled with no four in a row.';

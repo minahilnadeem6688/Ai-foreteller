@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Foreteller</title>
   <meta name="description" content="Connect Four against an AI that shows you what it sees: every column scored, the line of play it expects, and how much of the game tree alpha-beta pruning skipped.">
-  <meta name="theme-color" content="#12151E">
+  <meta name="theme-color" content="#FFF4DF">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Space+Mono:wght@400;700&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="top">
     <a class="brand" href="./" aria-label="AI Foreteller, new game">
-      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="14.5" r="10"/><path d="M9.5 27.5h13M12.5 24l-1.5 3.5M19.5 24l1.5 3.5"/><circle class="brand__glint" cx="12.5" cy="11" r="1.8"/></svg>
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><circle class="brand__disc" cx="20" cy="20" r="17"/><path class="brand__eye" d="M8.5 20c3-5 7-7.5 11.5-7.5S28.5 15 31.5 20c-3 5-7 7.5-11.5 7.5S11.5 25 8.5 20z"/><circle class="brand__iris" cx="20" cy="20" r="4.6"/></svg>
       <span>AI Foreteller</span>
     </a>
     <div class="controls">
@@ -35,8 +35,11 @@
   <main class="stage">
     <section class="play" aria-label="Board">
       <div class="verdict">
-        <p class="verdict__who" id="turnLabel"><i class="dot dot--you"></i><span>Your move</span></p>
-        <p class="verdict__text" id="verdict" aria-live="polite">Drop a disc in any column. Four in a row wins.</p>
+        <div class="seer" aria-hidden="true"><svg viewBox="0 0 40 40"><circle class="brand__disc" cx="20" cy="20" r="17"/><path class="brand__eye" d="M8.5 20c3-5 7-7.5 11.5-7.5S28.5 15 31.5 20c-3 5-7 7.5-11.5 7.5S11.5 25 8.5 20z"/><circle class="brand__iris seer__iris" cx="20" cy="20" r="4.6"/></svg></div>
+        <div class="bubble">
+          <p class="verdict__who" id="turnLabel"><i class="dot dot--you"></i><span>Your move</span></p>
+          <p class="verdict__text" id="verdict" aria-live="polite">Drop a disc in any column. Four in a row wins.</p>
+        </div>
       </div>
 
       <div class="foresight" aria-hidden="true">
@@ -100,7 +103,7 @@
   </main>
 
   <footer class="foot">
-    <p><i class="dot dot--you"></i>You play ivory <i class="dot dot--ai"></i>The Foreteller plays brass</p>
+    <p><i class="dot dot--you"></i>You play yellow <i class="dot dot--ai"></i>The Foreteller plays red</p>
     <p class="mono">Keys 1 to 7 drop a disc</p>
   </footer>
 

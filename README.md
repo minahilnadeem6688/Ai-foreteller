@@ -9,7 +9,7 @@ and a live count of how much of the game tree alpha-beta pruning skipped.
 
 **[Play it](https://ai-foreteller.netlify.app)**
 
-<img src="docs/screenshots/game.png" width="860" alt="AI Foreteller mid-game: column scores above the board, the expected line of play as numbered outlines, and the search panel" />
+<img src="docs/screenshots/game.png" width="860" alt="AI Foreteller mid-game: column scores above the board, the next predicted moves as numbered dashed discs, and the search panel" />
 
 </div>
 
@@ -19,12 +19,13 @@ and a live count of how much of the game tree alpha-beta pruning skipped.
   Seer looks 8 moves ahead. Oracle searches as deep as it can in about two seconds: around 15 moves from the opening on a laptop, and deeper as the board fills.
 - **Foresight row.** After each move, a bar above every column shows how good that column was for the AI:
   a score, or "win 3" / "loss 2" once it can see the game to the end.
-- **The line it expects.** Numbered outlines on the board show the next moves it thinks both of you will play.
+- **The line it expects.** Numbered dashed discs on the board show the next 8 moves it thinks both of you will play.
 - **Read my future.** Runs the same search for your side and shows your strongest column.
 - **The reading.** Positions judged, branches cut, positions recalled from memory, and each round of the
   search as it finishes, so you can watch it look one move deeper at a time.
 - **Pruning at work.** Compares the positions it visited with what a plain minimax could need at the same depth.
 - Take back a move, choose who starts, keys 1 to 7 to drop a disc, and a layout that works on phones.
+- **Look.** The classic red and yellow on a cobalt board, drawn like a sticker sheet: thick outlines, hard shadows, and a Foreteller that speaks in a bubble and glances around while it thinks. Type is Bungee, Bricolage Grotesque and Space Mono.
 
 ## How the AI works
 
