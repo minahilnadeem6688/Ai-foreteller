@@ -1,33 +1,110 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Fortune Teller 🔮</title>
-  <script src="script.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Foreteller</title>
+  <meta name="description" content="Connect Four against an AI that shows you what it sees: every column scored, the line of play it expects, and how much of the game tree alpha-beta pruning skipped.">
+  <meta name="theme-color" content="#12151E">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>🔮 AI Fortune Teller 🔮</h1>
-  <p class="subtitle">The AI looks into the crystal ball and sees the future...</p>
+  <header class="top">
+    <a class="brand" href="./" aria-label="AI Foreteller, new game">
+      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="14.5" r="10"/><path d="M9.5 27.5h13M12.5 24l-1.5 3.5M19.5 24l1.5 3.5"/><circle class="brand__glint" cx="12.5" cy="11" r="1.8"/></svg>
+      <span>AI Foreteller</span>
+    </a>
+    <div class="controls">
+      <div class="seg" role="radiogroup" aria-label="Difficulty" id="levels">
+        <button type="button" role="radio" data-level="apprentice">Apprentice</button>
+        <button type="button" role="radio" data-level="seer">Seer</button>
+        <button type="button" role="radio" data-level="oracle">Oracle</button>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="Who starts" id="starters">
+        <button type="button" role="radio" data-start="you">You start</button>
+        <button type="button" role="radio" data-start="ai">It starts</button>
+      </div>
+      <button type="button" class="btn btn--solid" id="newGame">New game</button>
+    </div>
+  </header>
 
-  <!-- Crystal ball -->
-  <div id="crystalBall">
-    <p id="status">Your turn! Pick a number of gems (1–3).</p>
-    <div id="branches"></div>
-  </div>
+  <main class="stage">
+    <section class="play" aria-label="Board">
+      <div class="verdict">
+        <p class="verdict__who" id="turnLabel"><i class="dot dot--you"></i><span>Your move</span></p>
+        <p class="verdict__text" id="verdict" aria-live="polite">Drop a disc in any column. Four in a row wins.</p>
+      </div>
 
-  <!-- Gems left -->
-  <h2>Remaining Gems: <span id="remaining"></span></h2>
-  <div id="gems"></div>
+      <div class="foresight" aria-hidden="true">
+        <p class="foresight__label mono" id="foresightLabel">Foresight</p>
+        <div class="foresight__cols" id="foresightCols"></div>
+      </div>
 
-  <!-- Player controls -->
-  <div class="controls">
-    <button onclick="playerMove(1)">Take 1</button>
-    <button onclick="playerMove(2)">Take 2</button>
-    <button onclick="playerMove(3)">Take 3</button>
-  </div>
+      <div class="board" id="board" aria-label="Connect Four board, 7 columns"></div>
 
-  <script src="script.js"></script>
+      <div class="result" id="result" hidden>
+        <div>
+          <p class="result__title" id="resultTitle"></p>
+          <p class="result__text" id="resultText"></p>
+        </div>
+        <button type="button" class="btn btn--solid" id="again">Play again</button>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn" id="hint">Read my future</button>
+        <button type="button" class="btn" id="undo">Take back</button>
+        <label class="switch"><input type="checkbox" id="showLine" checked><span aria-hidden="true"></span>Show the line it expects</label>
+      </div>
+    </section>
+
+    <aside class="reading" aria-label="What the Foreteller sees">
+      <div class="reading__head">
+        <h2>The reading</h2>
+        <p class="mono reading__sub" id="readingSub">Waiting for the first search</p>
+      </div>
+
+      <dl class="stats">
+        <div><dt>Looked ahead</dt><dd><span id="stDepth">0</span><small> moves</small></dd></div>
+        <div><dt>Positions judged</dt><dd id="stNodes">0</dd></div>
+        <div><dt>Branches cut</dt><dd id="stCuts">0</dd></div>
+        <div><dt>Recalled from memory</dt><dd id="stHits">0</dd></div>
+      </dl>
+
+      <div class="compare">
+        <p class="compare__title">Pruning at work</p>
+        <div class="compare__row"><span>Plain minimax</span><div class="compare__bar"><i id="barFull"></i></div><b class="mono" id="cmpFull">0</b></div>
+        <div class="compare__row"><span>Alpha-beta</span><div class="compare__bar"><i class="is-ab" id="barAb"></i></div><b class="mono" id="cmpAb">0</b></div>
+        <p class="compare__note" id="cmpNote">Positions visited at the same depth, on a log scale.</p>
+      </div>
+
+      <div class="depths">
+        <p class="depths__title">Each round, one move deeper</p>
+        <ol class="depths__list mono" id="depths"></ol>
+      </div>
+
+      <details class="how">
+        <summary>How it thinks</summary>
+        <ol>
+          <li><b>Minimax.</b> It plays every move forward and assumes you answer with your best reply.</li>
+          <li><b>Alpha-beta pruning.</b> Once a move is proven worse than one it already has, the rest of that branch is skipped.</li>
+          <li><b>Iterative deepening.</b> It searches 1 move ahead, then 2, then 3, and each round decides which moves to try first in the next.</li>
+          <li><b>Memory.</b> A position reached again through a different move order is looked up in a table instead of searched twice.</li>
+          <li><b>Judging a position.</b> When it can't see to the end, it counts open lines of two and three and favours the centre column.</li>
+        </ol>
+      </details>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <p><i class="dot dot--you"></i>You play ivory <i class="dot dot--ai"></i>The Foreteller plays brass</p>
+    <p class="mono">Keys 1 to 7 drop a disc</p>
+  </footer>
+
+  <script src="js/engine.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

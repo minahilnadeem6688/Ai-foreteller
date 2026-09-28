@@ -1,0 +1,11 @@
+{
+  "name": "ai-foreteller",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Connect Four against a search AI that shows what it sees",
+  "scripts": {
+    "start": "npx serve .",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}

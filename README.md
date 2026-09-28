@@ -1,80 +1,98 @@
-# **Ai-Foreteller**
+<div align="center">
 
-![Minimax AI](https://img.shields.io/badge/AI-Minimax-blue) ![HTML5](https://img.shields.io/badge/HTML5-orange) ![CSS3](https://img.shields.io/badge/CSS3-blueviolet) ![JavaScript](https://img.shields.io/badge/JavaScript-yellow)
+# AI Foreteller
 
-**A Minimax-powered Nim Puzzle game where the AI predicts and plays optimally. Built with HTML, CSS, and JavaScript.**
+**Connect Four against an AI that shows you what it sees.**
 
----
+Every column scored, the line of play it expects drawn on the board,
+and a live count of how much of the game tree alpha-beta pruning skipped.
 
-## **📖 Overview**
+**[Play it](https://ai-foreteller.netlify.app)**
 
-**Nim Puzzle Foresight** is a web-based strategy game. Players take turns removing stones from piles, while the AI uses the **Minimax algorithm** to calculate optimal moves, ensuring challenging and strategic gameplay.
+<img src="docs/screenshots/game.png" width="860" alt="AI Foreteller mid-game: column scores above the board, the expected line of play as numbered outlines, and the search panel" />
 
----
+</div>
 
-## **🚀 Features**
+## What it does
 
-| Feature                      | Description                                                    |
-| ---------------------------- | -------------------------------------------------------------- |
-| ♟️ **Classic Gameplay**      | A strategic game of piles and stones.                          |
-| 🧠 **AI with Minimax Logic** | The computer predicts future moves and always plays optimally. |
-| 📱 **Responsive Design**     | Fully functional on both desktop and mobile.                   |
-| 🔥 **Unbeatable AI**         | Test your strategy against a perfect AI opponent.              |
+- **Three levels.** Apprentice looks 2 moves ahead and sometimes picks a slightly weaker move.
+  Seer looks 8 moves ahead. Oracle searches as deep as it can in about two seconds: around 15 moves from the opening on a laptop, and deeper as the board fills.
+- **Foresight row.** After each move, a bar above every column shows how good that column was for the AI:
+  a score, or "win 3" / "loss 2" once it can see the game to the end.
+- **The line it expects.** Numbered outlines on the board show the next moves it thinks both of you will play.
+- **Read my future.** Runs the same search for your side and shows your strongest column.
+- **The reading.** Positions judged, branches cut, positions recalled from memory, and each round of the
+  search as it finishes, so you can watch it look one move deeper at a time.
+- **Pruning at work.** Compares the positions it visited with what a plain minimax could need at the same depth.
+- Take back a move, choose who starts, keys 1 to 7 to drop a disc, and a layout that works on phones.
 
----
+## How the AI works
 
-## **🕹️ How to Play**
+All of it is in [`js/engine.js`](js/engine.js), about 380 lines with no libraries.
 
-1. Open the game in your browser.
-2. Take turns with the AI to remove **1 or more stones** from any pile.
-3. The player that takes ** the last gem wins**.
-4. Outsmart the AI — if you can 😉.
+| Technique | What it does here |
+| --- | --- |
+| Negamax with alpha-beta pruning | Minimax written from the side to move's point of view. A branch is dropped as soon as it is proven worse than a move already found. |
+| Iterative deepening | Searches 1 move ahead, then 2, then 3, until the time or depth limit. Each round's best move is tried first in the next, which makes pruning far more effective. |
+| Move ordering | Centre columns first, and the best move remembered for a position before anything else. |
+| Transposition table | Zobrist hashing of the board into a table of about a million entries, so a position reached by a different move order is looked up instead of searched again. Deeper results from the current search are protected from being overwritten. |
+| Win detection | Checks only the lines through the new disc, and wins in one move are found before searching further. |
+| Evaluation | When the end is out of sight, each of the 69 possible lines of four is scored by how many discs one player has in it with the other player's absent, plus a bonus for the centre column. |
+| Win distance | A win found k moves ahead scores higher the smaller k is, so it takes the fastest win and, when losing, holds out longest. |
+| Web Worker | The search runs off the main thread, so the page keeps animating while it thinks. Opened from a file, it falls back to searching on the page. |
 
----
+Looking 8 moves ahead from the opening, a plain minimax could visit about 6.7 million positions.
+Alpha-beta with this move ordering visits around 27 thousand.
 
-## **🛠️ Tech Stack**
+## Screenshots
 
-| Technology        | Purpose                     |
-| ----------------- | --------------------------- |
-| HTML5             | Structure & markup          |
-| CSS3              | Styling & responsive design |
-| JavaScript        | Game logic & interactivity  |
-| Minimax Algorithm | AI decision-making          |
+| Reading your future | The Foreteller wins |
+| --- | --- |
+| <img src="docs/screenshots/hint.png" width="420" alt="Hint mode showing your strongest column" /> | <img src="docs/screenshots/win.png" width="420" alt="Winning line highlighted" /> |
 
----
+| Phone | The reading on a phone |
+| --- | --- |
+| <img src="docs/screenshots/phone.png" width="260" alt="Board on a phone" /> | <img src="docs/screenshots/phone-reading.png" width="260" alt="Search panel on a phone" /> |
 
-## **🎮 Demo**
+## Run it
 
-* **Live Game:** \[https://ai-foreteller.netlify.app/]
+It is a static site with no build step.
 
----
+```bash
+npx serve .      # then open the address it prints
+npm test         # engine tests, Node 20 or newer
+```
 
-## **📸 Screenshots**
+Opening `index.html` straight from the file system also works; the search then runs on the page
+instead of in a worker.
 
-| Stage            | Screenshot              |
-| ---------------- | ----------------------- |
-| Game Start       | ![Start](<img width="1319" height="584" alt="image" src="https://github.com/user-attachments/assets/e4e584b4-0e93-4dda-95c0-0957361d6451" />
-) |
-| Mid-Game AI Move | ![Mid](<img width="1219" height="583" alt="image" src="https://github.com/user-attachments/assets/2529b816-db2c-4fce-b4ab-80224084780e" />
-)
-)   |
-| Winning Screen   | ![Win](<img width="1276" height="577" alt="image" src="https://github.com/user-attachments/assets/662a47f2-67b4-4642-890e-22b572192e45" />
-)   |
+## Tests
 
+[`test/engine.test.js`](test/engine.test.js) uses Node's built-in test runner and checks:
 
----
+- wins in all four directions, and the four cells returned for the highlight
+- that undo restores the board and its hash, and that one position reached in two orders hashes the same
+- that it takes a win in one, blocks a threat, and finds a forced win through a double threat
+- that iterative deepening reports each depth in order and stops on time
+- that pruning visits under 1% of what plain minimax would at depth 8
+- that the expected line is always legal and as long as the search depth
+- that it never loses to a random player
 
-## **🏆 Hackathon Submission**
+## Project structure
 
-* **Repository:** [Ai-Foreteller on GitHub](https://github.com/meneske16/Ai-foreteller)
-* **Live Game: https://ai-foreteller.netlify.app/
+```
+index.html            Page
+styles.css            Layout and theme
+js/engine.js          Board, evaluation and search (also loaded by the worker and the tests)
+js/worker.js          Runs the search in a Web Worker
+js/app.js             Turns, board rendering and the reading panel
+test/engine.test.js   Engine tests
+```
 
----
+## Author
 
-## **👩‍💻 Author**
+**Minahil Nadeem** · [GitHub](https://github.com/minahilnadeem6688) · [LinkedIn](https://www.linkedin.com/in/minahil-nadeem23)
 
-**Minahil Nadeem**
-Software Engineering & Cybersecurity Student
+## License
 
-
-
+[MIT](LICENSE)
